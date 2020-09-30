@@ -11,36 +11,88 @@ var connection = mysql.createConnection({
   user: "root",
 
   // Your password
-  password: "",
+  password: "Pookie_25?!",
   database: "company_db"
 });
 
-connection.connect(function(err) {
-    
+connection.connect(function (err) {
+
   if (err) throw err;
   initApp()
 });
 
 function initApp() {
 
-    inquirer
-        .prompt ({
+  inquirer
+    .prompt({
 
-          type: "list",
-          name: "userAction",
-          choices:["Manage Roles", "Manage Employees", "Manage Departments"]
-        }).then((response) => {
+      type: "list",
+      name: "userAction",
+      message: "What would you like to do?",
+      choices: ["Manage roles", "Manage employees", "Manage departments"]
+    }).then((response) => {
 
-          switch (response.userAction) {
+      switch (response.userAction) {
 
-            case "Manage Roles":
-              manageRoles();
-            
-            case "Manage Employees":
-              manageEmployees();
+        case "Manage roles":
+          viewData(`roles`)
+          break;
 
-            case "Manage Departments":
-              manageDepartments();
-          } 
-        })
+        case "Manage employees":
+          console.log("here are some employees");
+          break;
+
+        case "Manage departments":
+          console.log("here are some departments");
+          break;
+      }
+    })
+}
+
+function viewData(tableName) {
+
+  connection.query("SELECT * from " + tableName, function(err,result) {
+
+    if(err) throw err;
+
+    console.table(result);
+  })
+}
+
+
+function manageRoles() {
+
+  inquirer
+    .prompt([
+
+      {
+        type: "list",
+        name: ""
+      }
+    ])
+}
+
+function manageEmployees() {
+
+  inquirer
+    .prompt([
+
+      {
+        type: "list",
+        name: ""
+      }
+    ])
+}
+
+function manageDepartments() {
+
+  inquirer
+    .prompt([
+
+      {
+        type: "list",
+        name: ""
+      }
+    ])
+
 }
