@@ -16,6 +16,31 @@ var connection = mysql.createConnection({
 });
 
 connection.connect(function(err) {
+    
   if (err) throw err;
-  runSearch();
+  initApp()
 });
+
+function initApp() {
+
+    inquirer
+        .prompt ({
+
+          type: "list",
+          name: "userAction",
+          choices:["Manage Roles", "Manage Employees", "Manage Departments"]
+        }).then((response) => {
+
+          switch (response.userAction) {
+
+            case "Manage Roles":
+              manageRoles();
+            
+            case "Manage Employees":
+              manageEmployees();
+
+            case "Manage Departments":
+              manageDepartments();
+          } 
+        })
+}
