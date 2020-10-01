@@ -40,7 +40,7 @@ function initApp() {
           break;
 
         case "employees":
-          console.log("here are some employees");
+          manageEmployees()
           break;
 
         case "departments":
@@ -107,7 +107,7 @@ function manageRoles() {
         case "View existing roles":
 
           connection.query(
-            "SELECT title, salary, name FROM roles INNER JOIN departments ON roles.department_id = departments.id", function (err, results) {
+            "SELECT title, salary, department_name FROM roles INNER JOIN departments ON roles.department_id = departments.id", function (err, results) {
 
               if (err) throw err;
 
@@ -173,7 +173,7 @@ function manageRoles() {
 
             for (i = 0; i < results.length; i++) {
 
-              departmentArr.push(results[i].name)
+              departmentArr.push(results[i].department_name)
             }
 
           })
@@ -202,7 +202,7 @@ function manageRoles() {
               }
             ]).then(function (response) {
 
-              connection.query("SELECT id FROM departments WHERE name = ?", [response.roleDepName], function (err, depId) {
+              connection.query("SELECT id FROM departments WHERE department_name = ?", [response.roleDepName], function (err, depId) {
 
                 if (err) throw err;
 
@@ -219,26 +219,26 @@ function manageRoles() {
 
         case "Delete a role":
 
-          inquirer.prompt({
+          connection.query("SELECT title FROM roles", function (err, results) {
 
-            type: "list",
-            name: "deleteChoice",
-            message: "Which role would you like to delete?",
-            choices: function () {
+            if (err) throw err;
 
-              let roleArr = []
+            inquirer.prompt({
 
-              connection.query("SELECT title FROM roles", function (err, results) {
+              type: "list",
+              name: "deleteChoice",
+              message: "Which role would you like to delete?",
+              choices: function () {
 
-                if (err) throw err;
+                let roleArr = []
 
                 for (i = 0; i < results.length; i++) {
 
                   roleArr.push(results[i].title)
                 }
                 return roleArr
-              })
-            }.then(function (choice) {
+              }
+            }).then(function (choice) {
 
               connection.query("DELETE from roles WHERE title = ?", [choice.deleteChoice], function (err) {
 
@@ -247,6 +247,7 @@ function manageRoles() {
                 otherAction()
               })
             })
+
           })
           break;
       }
@@ -256,13 +257,84 @@ function manageRoles() {
 function manageEmployees() {
 
   inquirer
-    .prompt([
+    .prompt({
 
-      {
-        type: "list",
-        name: ""
+      type: "list",
+      name: "employeeAction",
+      message: "What would you like to do in the employees section?",
+      choices: ["View employees", "Update an existing employee", "Add a new employee", "Delete an employee"]
+    }).then(function (userChoice) {
+
+      switch (userChoice.employeeAction) {
+
+        case "View employees":
+
+          inquirer
+            .prompt({
+
+              type: "list",
+              name: "viewChoice",
+              message: "Which employees would you like to view?",
+              choices: ["All employees", "Employees under a specific manager"]
+            }).then(function (viewOption) {
+
+              switch (viewOption.viewChoice) {
+
+                case "All employees":
+
+                  connection.query("SELECT first_name, last_name, salary, title, department_name FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id", function (err, results) {
+
+                    if (err) throw err;
+
+                    console.table(results)
+                    otherAction()
+                  })
+
+                  break;
+
+                case "Employees under a specific manager":
+
+                  connection.query("SELECT employees.id, first_name, last_name, salary, title, department_name FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id WHERE title = 'Manager' OR title = 'Developer Manager' OR title = 'Director of Marketing' OR title = 'HR Manager'", function (err, managersReturned) {
+
+                    if (err) throw err;
+
+                    inquirer.prompt({
+
+                      type: "list",
+                      name: "managerTeam",
+                      message: "Which manager's team would you like to view?",
+                      choices: function () {
+
+                        let managerArr = []
+
+                        for (i = 0; i < managersReturned.length; i++) {
+
+                          managerArr.push(managersReturned[i].first_name + " " + managersReturned[i].last_name);
+                        }
+                        return managerArr
+                      }
+                    }).then(function (managerChoice) {
+
+                      let nameArr = managerChoice.managerTeam.split(" ")
+                      connection.query("SELECT id from employees WHERE first_name = ? AND last_name = ?", nameArr, function (err, data) {
+
+                        if (err) throw err;
+
+                        connection.query("SELECT first_name, last_name, salary, title, department_name FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id WHERE employees.manager_id = ?", data[0].id, function (err, employeeList) {
+
+                          if (err) throw err;
+
+                          console.table(employeeList)
+                        })
+                      })
+                    })
+                  })
+
+                  break;
+              }
+            })
       }
-    ])
+    })
 }
 
 function manageDepartments() {
