@@ -21,7 +21,8 @@
 
   If you do not import the test data included in this repository, you should first use this tool to add your desired roles, employees, and departments as necessary (I recommend adding departments first, then roles, then employees).
   
-  Please refer to the following for a visual example: 
+  Please refer to the following for a visual example:
+  ![gif example](/Images/employee_manager_demo.gif)
 
   ## Contributing
   Please email cristino.perez525@gmail.com with any feedback/comments/bugs.
