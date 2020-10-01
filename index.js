@@ -452,12 +452,10 @@ function manageEmployees() {
                     connection.query("SELECT manager_id FROM employees WHERE ? AND ?", [{ first_name: chosenNameArr[0] }, { last_name: chosenNameArr[1] }], function (err, currentManager) {
 
                       if (err) throw err;
-                      console.log(currentManager[0].manager_id)
 
                       connection.query("SELECT employees.id, first_name, last_name, salary, title, department_name FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id WHERE employees.id != ? AND title = 'Manager' OR employees.id != ? AND title = 'Developer Manager' OR employees.id != ? AND title = 'Director of Marketing' OR employees.id != ? AND title = 'HR Manager'", [parseInt(currentManager[0].manager_id), parseInt(currentManager[0].manager_id), parseInt(currentManager[0].manager_id), parseInt(currentManager[0].manager_id)], function (err, remainingManagers) {
 
                         if (err) throw err;
-                        console.log(remainingManagers)
 
                         inquirer.prompt({
                           type: "list",
@@ -544,8 +542,7 @@ function manageEmployees() {
                   connection.query("SELECT id FROM roles WHERE title = ?", [roleDecision.chosenRole], function (err, roleId) {
 
                     if (err) throw err;
-
-                    console.log(roleId.id)
+                    
                     connection.query("SELECT employees.id, first_name, last_name, salary, title, department_name FROM employees INNER JOIN roles ON employees.role_id = roles.id INNER JOIN departments ON roles.department_id = departments.id WHERE title = 'Manager' OR title = 'Developer Manager' OR title = 'Director of Marketing' OR title = 'HR Manager'", function (err, managerList) {
 
                       if (err) throw err;
